@@ -1,10 +1,18 @@
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy import create_engine
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 from core.config import settings
 
-engine = create_async_engine(settings.DB_HOST, echo=True, future=True)
+# т.к. приложение маленькое, здешний код будет синхронный
+# но асинхронный код было бы написать интереснее ес честно
 
-async_session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+DATABASE_URL = (
+    f"postgresql+psycopg://{settings.DB_USER}:{settings.DB_PASSWORD}"
+    f"@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
+)
+
+engine = create_engine(DATABASE_URL, echo=True, future=True)
+
+session_maker = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 
 class Base(DeclarativeBase):
     pass
