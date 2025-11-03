@@ -11,7 +11,6 @@ DATABASE_URL = (
 )
 
 engine = create_engine(DATABASE_URL, echo=True, future=True)
-
 session_maker = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 
 class Base(DeclarativeBase):
