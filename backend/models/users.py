@@ -27,6 +27,6 @@ class Users(Base):
     role: Mapped[RoleEnum] = mapped_column(SqlEnum(RoleEnum, name='role_enum'),nullable=False)
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.now())
 
-    moments = relationship("Moment", back_populates="user", cascade="all, delete", passive_deletes=True)
-    comments = relationship("Comment", back_populates="user", cascade="all, delete", passive_deletes=True)
-    likes = relationship("Like", back_populates="user", cascade="all, delete", passive_deletes=True)
+    moments = relationship("Moments", back_populates="user", cascade="all, delete", passive_deletes=True)
+    comments = relationship("Comments", back_populates="user", cascade="all, delete", passive_deletes=True)
+    likes = relationship("Likes", back_populates="user", cascade="all, delete", passive_deletes=True)

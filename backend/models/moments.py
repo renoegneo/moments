@@ -6,7 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.database import Base
 
 
-class Moment(Base):
+class Moments(Base):
     __tablename__ = 'moments'
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -31,5 +31,5 @@ class Moment(Base):
 
     # связи
     user = relationship("Users", back_populates="moments", passive_deletes=True)
-    comments = relationship("Comment", back_populates="moment", cascade="all, delete", passive_deletes=True)
-    likes = relationship("Like", back_populates="moment", cascade="all, delete", passive_deletes=True)
+    comments = relationship("Comments", back_populates="moment", cascade="all, delete", passive_deletes=True)
+    likes = relationship("Likes", back_populates="moment", cascade="all, delete", passive_deletes=True)
