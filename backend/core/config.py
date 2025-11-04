@@ -11,6 +11,10 @@ class Settings(BaseSettings):
     DB_USER: str
     DB_PASSWORD: str
     SECRET_KEY: str
+    ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 14
+
 
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env",
