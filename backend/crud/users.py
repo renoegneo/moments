@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
-from backend.models.users import Users, RoleEnum
-from backend.core.security import hash_password
-from backend.core.exceptions import RegistrationError
+from models.users import Users, RoleEnum
+from core.security import hash_password
+from core.exceptions import RegistrationError
 import uuid
 
 

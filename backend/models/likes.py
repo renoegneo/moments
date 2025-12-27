@@ -3,7 +3,7 @@ import datetime
 from sqlalchemy import DateTime, ForeignKey, func, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from backend.database import Base
+from database import Base
 
 
 class Likes(Base):

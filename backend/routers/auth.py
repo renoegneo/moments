@@ -3,11 +3,17 @@ from sqlalchemy.orm import Session
 
 from fastapi import Cookie
 
-from backend.schemas.users import RegisterRequest, LoginRequest, AuthResponse, UserResponse
-from backend.crud.users import create_user, get_user_by_username
-from backend.core.security import verify_password, create_access_token, create_refresh_token, decode_token
-from backend.core.exceptions import RegistrationError
-from backend.dependencies import get_db
+from schemas.users import RegisterRequest, LoginRequest, AuthResponse, UserResponse
+from crud.users import create_user, get_user_by_username
+from core.security import verify_password, create_access_token, create_refresh_token, decode_token
+from core.exceptions import RegistrationError
+from dependencies import get_db
+from dependencies import get_current_user
+from models.users import Users
+
+from crud.users import get_user_by_id
+import uuid
+
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -111,8 +117,6 @@ def refresh_token_endpoint(
         if not user_id:
             raise HTTPException(status_code=401, detail="Невалидный токен")
 
-        from backend.crud.users import get_user_by_id
-        import uuid
 
         user = get_user_by_id(db, uuid.UUID(user_id))
 
@@ -140,3 +144,9 @@ def logout(response: Response):
     response.delete_cookie("access_token")
     response.delete_cookie("refresh_token")
     return {"message": "Выход выполнен"}
+
+
+
+@router.get("/me", response_model=UserResponse)
+def get_me(current_user: Users = Depends(get_current_user)):
+    return UserResponse.model_validate(current_user)

@@ -5,7 +5,7 @@ from sqlalchemy.types import Enum as SqlEnum
 import uuid
 import datetime
 from enum import Enum
-from backend.database import Base
+from database import Base
 
 class RoleEnum(str, Enum):
     ADMIN = "admin"
