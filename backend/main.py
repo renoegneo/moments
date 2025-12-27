@@ -1,21 +1,23 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from backend.routers import auth
 
 app = FastAPI()
 
-# Разрешаем фронтенду обращаться к бэку
 origins = [
-    "http://localhost:3000",  # React dev server
+    "http://localhost:3000",
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,          # Разрешённые источники
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],            # Разрешаем все методы (GET, POST и т.д.)
-    allow_headers=["*"],            # Разрешаем все заголовки
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
+
+app.include_router(auth.router)
 
 @app.get("/")
 def root():
-    return {"message": "Backend работает и готов принимать запросы"}
+    return {"message": "Теперь точно работает"}
