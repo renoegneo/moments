@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import desc
+from sqlalchemy import desc, func
 import uuid
 
 from models.moments import Moments
-from core.exceptions import RegistrationError
+from models.likes import Likes
 
 
 def create_moment(db: Session, user_id: uuid.UUID, text: str, image_url: str | None = None) -> Moments:
@@ -20,29 +20,89 @@ def create_moment(db: Session, user_id: uuid.UUID, text: str, image_url: str | N
     return new_moment
 
 
+def get_user_moments(db: Session, user_id: uuid.UUID, skip: int = 0, limit: int = 20):
+    results = db.query(
+        Moments,
+        func.count(Likes.id).label('likes_count')
+    ).outerjoin(Likes, Likes.moment_id == Moments.id
+                ).filter(Moments.user_id == user_id
+                         ).group_by(Moments.id
+                                    ).order_by(desc(Moments.created_at)
+                                               ).offset(skip).limit(limit).all()
+
+    moments = []
+    for moment, likes_count in results:
+        moment.likes_count = likes_count
+        moments.append(moment)
+
+    return moments
+
+
 def get_moment_by_id(db: Session, moment_id: uuid.UUID) -> Moments | None:
-    return db.query(Moments).filter(Moments.id == moment_id).first()
+    result = db.query(
+        Moments,
+        func.count(Likes.id).label('likes_count')
+    ).outerjoin(Likes, Likes.moment_id == Moments.id
+                ).filter(Moments.id == moment_id
+                         ).group_by(Moments.id
+                                    ).first()
+
+    if not result:
+        return None
+
+    moment, likes_count = result
+    moment.likes_count = likes_count
+
+    return moment
+
+def get_moments_feed(db: Session, skip: int = 0, limit: int = 20):
+    results = db.query(
+        Moments,
+        func.count(Likes.id).label('likes_count')
+    ).outerjoin(Likes, Likes.moment_id == Moments.id
+                ).group_by(Moments.id
+                           ).order_by(desc(Moments.created_at)
+                                      ).offset(skip).limit(limit).all()
+
+    moments = []
+    for moment, likes_count in results:
+        moment.likes_count = likes_count
+        moments.append(moment)
+
+    return moments
 
 
-def get_moments_feed(db: Session, skip: int = 0, limit: int = 20) -> list[Moments]:
-    return db.query(Moments).order_by(desc(Moments.created_at)).offset(skip).limit(limit).all()
-
-
-def get_user_moments(db: Session, user_id: uuid.UUID, skip: int = 0, limit: int = 20) -> list[Moments]:
-    return db.query(Moments).filter(Moments.user_id == user_id).order_by(desc(Moments.created_at)).offset(skip).limit(
-        limit).all()
 
 
 def delete_moment(db: Session, moment_id: uuid.UUID, user_id: uuid.UUID) -> bool:
-    """Удалить момент (только владелец)"""
     moment = db.query(Moments).filter(Moments.id == moment_id).first()
 
     if not moment:
         return False
 
     if moment.user_id != user_id:
-        raise PermissionError("Нельзя удалить чужой момент")
+        raise PermissionError("Ты как бля это сделать умудрился")
 
     db.delete(moment)
     db.commit()
     return True
+
+
+def search_moments(db: Session, query: str, skip: int = 0, limit: int = 20):
+    search_pattern = f"%{query}%"
+
+    results = db.query(
+        Moments,
+        func.count(Likes.id).label('likes_count')
+    ).outerjoin(Likes, Likes.moment_id == Moments.id
+                ).filter(Moments.text.ilike(search_pattern)
+                         ).group_by(Moments.id
+                                    ).order_by(desc(Moments.created_at)
+                                               ).offset(skip).limit(limit).all()
+
+    moments = []
+    for moment, likes_count in results:
+        moment.likes_count = likes_count
+        moments.append(moment)
+
+    return moments

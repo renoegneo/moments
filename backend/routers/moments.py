@@ -9,8 +9,10 @@ from crud.moments import (
     get_moment_by_id,
     get_moments_feed,
     get_user_moments,
-    delete_moment
+    delete_moment,
+    search_moments  # добавь
 )
+
 from models.users import Users
 from dependencies import get_db, get_current_user
 
@@ -82,3 +84,17 @@ def delete_moment_endpoint(
 
     except PermissionError as e:
         raise HTTPException(status_code=403, detail=str(e))
+
+
+@router.get("/search", response_model=list[MomentDetailResponse])
+def search_moments_endpoint(
+        q: str,
+        skip: int = 0,
+        limit: int = 20,
+        db: Session = Depends(get_db)
+):
+    if len(q) < 2:
+        raise HTTPException(status_code=400, detail="Запрос должен быть минимум 2 символа")
+
+    moments = search_moments(db, q, skip, limit)
+    return [MomentDetailResponse.model_validate(m) for m in moments]

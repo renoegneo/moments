@@ -4,20 +4,12 @@ import uuid
 
 
 class UserBase(BaseModel):
-    username: str = Field(
-        min_length=3,
-        max_length=30
-    )
+    username: str = Field(min_length=3, max_length=30)
 
 
 class RegisterRequest(UserBase):
-    password: str = Field(
-        min_length=6,
-        max_length=100
-    )
-    fprint: str = Field(
-        min_length=1
-    )
+    password: str = Field(min_length=6, max_length=100)
+    fprint: str = Field(min_length=1)
 
 
 class LoginRequest(BaseModel):
@@ -30,7 +22,8 @@ class UserResponse(UserBase):
     role: str
     created_at: datetime
 
-    model_config = ConfigDict(from_attributes=True)
+    class Config:
+        from_attributes = True
 
 
 class AuthResponse(BaseModel):
