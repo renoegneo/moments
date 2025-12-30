@@ -1,16 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 import uuid
 
+from core.rate_limit import limiter
 from schemas.moments import MomentCreate, MomentResponse, MomentDetailResponse
-from schemas.users import UserResponse
+from schemas.pagination import PaginatedResponse
 from crud.moments import (
     create_moment,
     get_moment_by_id,
     get_moments_feed,
     get_user_moments,
     delete_moment,
-    search_moments  # добавь
+    search_moments, get_user_moments_total,
+    search_moments_total,
+    get_moments_total
 )
 
 from models.users import Users
@@ -20,10 +23,12 @@ router = APIRouter(prefix="/moments", tags=["Moments"])
 
 
 @router.post("", response_model=MomentResponse, status_code=201)
+@limiter.limit("30/hour")
 def create_moment_endpoint(
-        moment_data: MomentCreate,
-        current_user: Users = Depends(get_current_user),
-        db: Session = Depends(get_db)
+    request: Request,
+    moment_data: MomentCreate,
+    current_user: Users = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
     new_moment = create_moment(
         db=db,
@@ -34,14 +39,22 @@ def create_moment_endpoint(
     return MomentResponse.model_validate(new_moment)
 
 
-@router.get("/feed", response_model=list[MomentDetailResponse])
+@router.get("/feed", response_model=PaginatedResponse[MomentDetailResponse])
 def get_feed(
         skip: int = 0,
         limit: int = 20,
         db: Session = Depends(get_db)
 ):
     moments = get_moments_feed(db, skip, limit)
-    return [MomentDetailResponse.model_validate(m) for m in moments]
+    total = get_moments_total(db)
+
+    return PaginatedResponse(
+        items=[MomentDetailResponse.model_validate(m) for m in moments],
+        total=total,
+        skip=skip,
+        limit=limit,
+        has_more=(skip + limit) < total
+    )
 
 
 @router.get("/{moment_id}", response_model=MomentDetailResponse)
@@ -57,7 +70,7 @@ def get_moment(
     return MomentDetailResponse.model_validate(moment)
 
 
-@router.get("/user/{user_id}", response_model=list[MomentDetailResponse])
+@router.get("/user/{user_id}", response_model=PaginatedResponse[MomentDetailResponse])
 def get_user_moments_endpoint(
         user_id: uuid.UUID,
         skip: int = 0,
@@ -65,7 +78,15 @@ def get_user_moments_endpoint(
         db: Session = Depends(get_db)
 ):
     moments = get_user_moments(db, user_id, skip, limit)
-    return [MomentDetailResponse.model_validate(m) for m in moments]
+    total = get_user_moments_total(db, user_id)
+
+    return PaginatedResponse(
+        items=[MomentDetailResponse.model_validate(m) for m in moments],
+        total=total,
+        skip=skip,
+        limit=limit,
+        has_more=(skip + limit) < total
+    )
 
 
 @router.delete("/{moment_id}", status_code=204)
@@ -86,7 +107,7 @@ def delete_moment_endpoint(
         raise HTTPException(status_code=403, detail=str(e))
 
 
-@router.get("/search", response_model=list[MomentDetailResponse])
+@router.get("/search", response_model=PaginatedResponse[MomentDetailResponse])
 def search_moments_endpoint(
         q: str,
         skip: int = 0,
@@ -97,4 +118,12 @@ def search_moments_endpoint(
         raise HTTPException(status_code=400, detail="Запрос должен быть минимум 2 символа")
 
     moments = search_moments(db, q, skip, limit)
-    return [MomentDetailResponse.model_validate(m) for m in moments]
+    total = search_moments_total(db, q)
+
+    return PaginatedResponse(
+        items=[MomentDetailResponse.model_validate(m) for m in moments],
+        total=total,
+        skip=skip,
+        limit=limit,
+        has_more=(skip + limit) < total
+    )

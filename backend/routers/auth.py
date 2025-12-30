@@ -1,17 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
-
-from fastapi import Cookie
+from fastapi import Cookie, Request
 
 from schemas.users import RegisterRequest, LoginRequest, AuthResponse, UserResponse
-from crud.users import create_user, get_user_by_username
+
+from crud.users import create_user, get_user_by_username, get_user_by_id
+
 from core.security import verify_password, create_access_token, create_refresh_token, decode_token
 from core.exceptions import RegistrationError
+from core.rate_limit import limiter
+
 from dependencies import get_db
 from dependencies import get_current_user
+
 from models.users import Users
 
-from crud.users import get_user_by_id
 import uuid
 
 
@@ -19,10 +22,12 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
 @router.post("/register", response_model=AuthResponse, status_code=201)
+@limiter.limit("7/hour")
 def register(
-        response: Response,
-        user_data: RegisterRequest,
-        db: Session = Depends(get_db)
+    request: Request,
+    response: Response,
+    user_data: RegisterRequest,
+    db: Session = Depends(get_db)
 ):
     try:
         new_user = create_user(
@@ -61,10 +66,12 @@ def register(
     )
 
 @router.post("/login", response_model=AuthResponse)
+@limiter.limit("7/minute")
 def login(
-        response: Response,
-        credentials: LoginRequest,
-        db: Session = Depends(get_db)
+    request: Request,
+    response: Response,
+    credentials: LoginRequest,
+    db: Session = Depends(get_db)
 ):
     user = get_user_by_username(db, credentials.username)
 

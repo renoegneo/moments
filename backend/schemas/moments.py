@@ -26,6 +26,7 @@ class MomentResponse(MomentBase):
 class MomentDetailResponse(MomentResponse):
     user: UserResponse
     likes_count: int = 0
+    comments_count: int = 0
 
     class Config:
         from_attributes = True

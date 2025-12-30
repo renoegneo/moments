@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 import uuid
 
+from core.rate_limit import limiter
 from schemas.comments import CommentCreate, CommentResponse, CommentDetailResponse
 from crud.comments import create_comment, get_moment_comments, delete_comment
 from crud.moments import get_moment_by_id
@@ -12,11 +13,13 @@ router = APIRouter(prefix="/comments", tags=["Comments"])
 
 
 @router.post("/{moment_id}", response_model=CommentResponse, status_code=201)
+@limiter.limit("30/hour")  # 30 комментариев в час
 def create_comment_endpoint(
-        moment_id: uuid.UUID,
-        comment_data: CommentCreate,
-        current_user: Users = Depends(get_current_user),
-        db: Session = Depends(get_db)
+    request: Request,
+    moment_id: uuid.UUID,
+    comment_data: CommentCreate,
+    current_user: Users = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
     moment = get_moment_by_id(db, moment_id)
 
