@@ -1,0 +1,62 @@
+.create-moment-form {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.create-moment-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.create-moment-form textarea {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 0.2s;
+}
+
+.create-moment-form textarea:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.create-moment-form input {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.create-moment-form input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.create-moment-form button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.create-moment-form button:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.create-moment-form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

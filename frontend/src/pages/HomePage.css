@@ -1,0 +1,11 @@
+.home-page {
+  min-height: calc(100vh - 60px);
+  background-color: #f5f5f5;
+  padding: 2rem 0;
+}
+
+.home-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}

@@ -1,0 +1,65 @@
+.moment-detail-page {
+  min-height: calc(100vh - 60px);
+  background-color: #f5f5f5;
+  padding: 2rem 0;
+}
+
+.moment-detail-container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.moment-detail-card {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.moment-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.moment-detail-author {
+  cursor: pointer;
+}
+
+.moment-detail-content {
+  margin-bottom: 1.5rem;
+}
+
+.moment-detail-text {
+  color: #333;
+  line-height: 1.8;
+  font-size: 1.1rem;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.moment-detail-image {
+  width: 100%;
+  max-height: 500px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.moment-detail-footer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.moment-detail-date {
+  margin-left: auto;
+  color: #999;
+  font-size: 0.9rem;
+}
