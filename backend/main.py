@@ -39,7 +39,3 @@ def root(request: Request):
 @app.get("/health")
 def health():
     return {"status": "ok"}
-
-@app.on_event("startup")
-def create_tables():
-    Base.metadata.create_all(bind=engine)
