@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
@@ -6,6 +7,7 @@ from slowapi.middleware import SlowAPIMiddleware
 
 from routers import auth, moments, likes, comments
 from core.rate_limit import limiter
+from database import Base, engine
 import models
 
 app = FastAPI()
@@ -14,9 +16,11 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
 
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[FRONTEND_URL, "http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -30,4 +34,12 @@ app.include_router(comments.router)
 @app.get("/")
 @limiter.limit("100/minute")
 def root(request: Request):
-    return {"message": "Backend работает"}
+    return {"message": "Backend работает", "environment": os.getenv("ENVIRONMENT", "development")}
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+@app.on_event("startup")
+def create_tables():
+    Base.metadata.create_all(bind=engine)

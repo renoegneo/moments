@@ -1,26 +1,27 @@
-# общее
-fastapi>=0.115.0
+# основа бекенда
+fastapi[all]>=0.120.3
 uvicorn[standard]>=0.30.0
-
-# асинхронная бд постгрес
+# работа с бд
 SQLAlchemy>=2.0.30
-asyncpg>=0.29.0
 alembic>=1.13.0
+psycopg>=3.2.12
+psycopg-binary==3.3.1
 
-# валидация и конфиги
+
+# валидация данных
 pydantic>=2.8.0
 pydantic-settings>=2.2.0
+
+# шифрование и безопасность
+python-jose>=3.3.0          # для JWT токенов
+passlib[bcrypt]>=1.7.4      # для хеширования паролей
+
+
+
+# дополнительные библиотеки
+python-multipart>=0.0.6     # загрузка файлов через формы
+aiofiles>=24.1.0            # async работа с файлами
+
+bcrypt>=4.1.3
+jose>=1.0.0
 slowapi>=0.1.9
-
-# токены и шифрование 
-python-jose>=3.3.0
-bcrypt>=5.0.0
-
-# для работы с файлами и изображениями (мб будут меняться)
-Pillow>=10.2.0
-python-multipart>=0.0.6
-aiofiles>=24.1.0
-
-# допы хз зачем вдруг надо
-email-validator>=2.2.0
-httpx>=0.27.0

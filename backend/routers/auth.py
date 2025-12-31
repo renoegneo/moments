@@ -22,7 +22,7 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
 @router.post("/register", response_model=AuthResponse, status_code=201)
-@limiter.limit("7/hour")
+@limiter.limit("5/hour")
 def register(
     request: Request,
     response: Response,
@@ -38,35 +38,37 @@ def register(
         )
     except RegistrationError as e:
         raise HTTPException(status_code=e.code, detail=e.message)
-
+    
     access_token = create_access_token({"sub": str(new_user.id)})
     refresh_token = create_refresh_token({"sub": str(new_user.id)})
-
+    
     response.set_cookie(
         key="access_token",
         value=access_token,
         httponly=True,
         secure=False,
         samesite="lax",
-        max_age=30 * 60
+        max_age=30 * 60,
+        path="/"
     )
-
+    
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
         httponly=True,
         secure=False,
         samesite="lax",
-        max_age=14 * 24 * 60 * 60
+        max_age=14 * 24 * 60 * 60,
+        path="/"
     )
-
+    
     return AuthResponse(
         message="Регистрация успешна",
         user=UserResponse.model_validate(new_user)
     )
 
 @router.post("/login", response_model=AuthResponse)
-@limiter.limit("7/minute")
+@limiter.limit("10/minute")
 def login(
     request: Request,
     response: Response,
@@ -74,34 +76,36 @@ def login(
     db: Session = Depends(get_db)
 ):
     user = get_user_by_username(db, credentials.username)
-
+    
     if not user or not verify_password(credentials.password, user.hashed_password):
         raise HTTPException(
             status_code=401,
             detail="Неверный username или пароль"
         )
-
+    
     access_token = create_access_token({"sub": str(user.id)})
     refresh_token = create_refresh_token({"sub": str(user.id)})
-
+    
     response.set_cookie(
         key="access_token",
         value=access_token,
         httponly=True,
         secure=False,
         samesite="lax",
-        max_age=30 * 60
+        max_age=30 * 60,
+        path="/"
     )
-
+    
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
         httponly=True,
         secure=False,
         samesite="lax",
-        max_age=14 * 24 * 60 * 60
+        max_age=14 * 24 * 60 * 60,
+        path="/"
     )
-
+    
     return AuthResponse(
         message="Вход выполнен",
         user=UserResponse.model_validate(user)
@@ -110,39 +114,40 @@ def login(
 
 @router.post("/refresh")
 def refresh_token_endpoint(
-        response: Response,
-        refresh_token: str = Cookie(None),
-        db: Session = Depends(get_db)
+    request: Request,
+    response: Response,
+    refresh_token: str = Cookie(None),
+    db: Session = Depends(get_db)
 ):
     if not refresh_token:
         raise HTTPException(status_code=401, detail="Refresh token отсутствует")
-
+    
     try:
         payload = decode_token(refresh_token)
         user_id = payload.get("sub")
-
+        
         if not user_id:
             raise HTTPException(status_code=401, detail="Невалидный токен")
-
-
+        
         user = get_user_by_id(db, uuid.UUID(user_id))
-
+        
         if not user:
             raise HTTPException(status_code=401, detail="Пользователь не найден")
-
+        
         new_access_token = create_access_token({"sub": str(user.id)})
-
+        
         response.set_cookie(
             key="access_token",
             value=new_access_token,
             httponly=True,
             secure=False,
             samesite="lax",
-            max_age=30 * 60
+            max_age=30 * 60,
+            path="/"
         )
-
+        
         return {"message": "Токен обновлён"}
-
+        
     except ValueError:
         raise HTTPException(status_code=401, detail="Невалидный токен")
 
