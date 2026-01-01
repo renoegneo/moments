@@ -20,7 +20,27 @@ import uuid
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
-
+def set_auth_cookies(response: Response, access_token: str, refresh_token: str):
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        max_age=30 * 60,
+        path="/"
+    )
+    
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        max_age=14 * 24 * 60 * 60,
+        path="/"
+    )
+    
 @router.post("/register", response_model=AuthResponse, status_code=201)
 @limiter.limit("5/hour")
 def register(
@@ -42,25 +62,7 @@ def register(
     access_token = create_access_token({"sub": str(new_user.id)})
     refresh_token = create_refresh_token({"sub": str(new_user.id)})
     
-    response.set_cookie(
-        key="access_token",
-        value=access_token,
-        httponly=True,
-        secure=False,
-        samesite="lax",
-        max_age=30 * 60,
-        path="/"
-    )
-    
-    response.set_cookie(
-        key="refresh_token",
-        value=refresh_token,
-        httponly=True,
-        secure=False,
-        samesite="lax",
-        max_age=14 * 24 * 60 * 60,
-        path="/"
-    )
+    set_auth_cookies(response, access_token, refresh_token)
     
     return AuthResponse(
         message="Регистрация успешна",
@@ -78,33 +80,12 @@ def login(
     user = get_user_by_username(db, credentials.username)
     
     if not user or not verify_password(credentials.password, user.hashed_password):
-        raise HTTPException(
-            status_code=401,
-            detail="Неверный username или пароль"
-        )
+        raise HTTPException(status_code=401, detail="Неверный username или пароль")
     
     access_token = create_access_token({"sub": str(user.id)})
     refresh_token = create_refresh_token({"sub": str(user.id)})
     
-    response.set_cookie(
-        key="access_token",
-        value=access_token,
-        httponly=True,
-        secure=False,
-        samesite="lax",
-        max_age=30 * 60,
-        path="/"
-    )
-    
-    response.set_cookie(
-        key="refresh_token",
-        value=refresh_token,
-        httponly=True,
-        secure=False,
-        samesite="lax",
-        max_age=14 * 24 * 60 * 60,
-        path="/"
-    )
+    set_auth_cookies(response, access_token, refresh_token)
     
     return AuthResponse(
         message="Вход выполнен",
@@ -140,8 +121,8 @@ def refresh_token_endpoint(
             key="access_token",
             value=new_access_token,
             httponly=True,
-            secure=False,
-            samesite="lax",
+            secure=True,
+            samesite="none",
             max_age=30 * 60,
             path="/"
         )
