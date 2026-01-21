@@ -5,6 +5,9 @@ from fastapi import Cookie, Request
 from schemas.users import RegisterRequest, LoginRequest, AuthResponse, UserResponse
 
 from crud.users import create_user, get_user_by_username, get_user_by_id
+import uuid
+from schemas.stats import UserStatsResponse
+from crud.stats import get_user_stats
 
 from core.security import verify_password, create_access_token, create_refresh_token, decode_token
 from core.exceptions import RegistrationError
@@ -15,7 +18,6 @@ from dependencies import get_current_user
 
 from models.users import Users
 
-import uuid
 
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -143,3 +145,21 @@ def logout(response: Response):
 @router.get("/me", response_model=UserResponse)
 def get_me(current_user: Users = Depends(get_current_user)):
     return UserResponse.model_validate(current_user)
+
+@router.get("/stats/{user_id}", response_model=UserStatsResponse)
+def get_stats(
+    user_id: uuid.UUID,
+    db: Session = Depends(get_db)
+):
+    stats = get_user_stats(db, user_id)
+    return UserStatsResponse(**stats)
+
+
+@router.get("/me/stats", response_model=UserStatsResponse)
+def get_my_stats(
+    current_user: Users = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Получить свою статистику"""
+    stats = get_user_stats(db, current_user.id)
+    return UserStatsResponse(**stats)
