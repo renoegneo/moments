@@ -59,7 +59,7 @@ const MomentDetailPage = () => {
   };
 
   if (loading) {
-    return <div className="loading">Загрузка...</div>;
+    return <div className="loading">Щащаща...</div>;
   }
 
   if (!moment) {

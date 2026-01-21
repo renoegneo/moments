@@ -3,7 +3,7 @@ import './MomentFeed.css';
 
 const MomentFeed = ({ moments, loading, hasMore, onLoadMore, onMomentDeleted }) => {
   if (loading && moments.length === 0) {
-    return <div className="loading">Загрузка...</div>;
+    return <div className="loading">Щащаща...</div>;
   }
 
   if (moments.length === 0) {
@@ -30,7 +30,7 @@ const MomentFeed = ({ moments, loading, hasMore, onLoadMore, onMomentDeleted }) 
           onClick={onLoadMore}
           disabled={loading}
         >
-          {loading ? 'Загрузка...' : 'Загрузить ещё'}
+          {loading ? 'Щащаща...' : 'Загрузить ещё'}
         </button>
       )}
     </div>

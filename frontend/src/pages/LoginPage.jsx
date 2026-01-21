@@ -31,15 +31,15 @@ const LoginPage = () => {
   return (
     <div className="auth-page">
       <div className="auth-container">
-        <h1>Вход</h1>
+        <h1>С возвращением</h1>
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
-            <label>Username</label>
+            <label>Имечко</label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="Введите username"
+              placeholder="кто таков?"
               required
             />
           </div>
@@ -50,7 +50,7 @@ const LoginPage = () => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Введите пароль"
+              placeholder="секретный и никому не доступен"
               required
             />
           </div>
@@ -58,13 +58,11 @@ const LoginPage = () => {
           {error && <div className="error-message">{error}</div>}
 
           <button type="submit" className="auth-button" disabled={loading}>
-            {loading ? 'Загрузка...' : 'Войти'}
+            {loading ? 'Щащаща...' : 'Войти'}
           </button>
         </form>
 
-        <p className="auth-link">
-          Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
-        </p>
+
       </div>
     </div>
   );

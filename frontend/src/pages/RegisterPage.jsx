@@ -63,7 +63,7 @@ const RegisterPage = () => {
           {error && <div className="error-message">{error}</div>}
 
           <button type="submit" className="auth-button" disabled={loading}>
-            {loading ? 'Загрузка...' : 'Зарегистрироваться'}
+            {loading ? 'Щащаща...' : 'Зарегистрироваться'}
           </button>
         </form>
 

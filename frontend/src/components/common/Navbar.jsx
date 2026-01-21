@@ -15,7 +15,7 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="navbar-container">
         <Link to="/" className="navbar-logo">
-          Moments
+          Наши моменты
         </Link>
 
         <div className="navbar-menu">
@@ -30,7 +30,6 @@ const Navbar = () => {
           ) : (
             <>
               <Link to="/login" className="navbar-link">Вход</Link>
-              <Link to="/register" className="navbar-link">Регистрация</Link>
             </>
           )}
         </div>
